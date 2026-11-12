@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+node_modules/
+dist/
+*.db
+backend/keys/
+backend/uploads/
+idp-certs/
+.env
+test-results/
+playwright-report/
