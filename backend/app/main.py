@@ -123,6 +123,13 @@ def startup_status(request: Request):
     return {"database": "error" if err else "ok", "detail": err if mode() == "vulnerable" else None}
 
 
+if os.environ.get("EMBED_IDP") == "1":
+    import importlib.util
+    _spec = importlib.util.spec_from_file_location("vulncrm_idp", os.environ.get("IDP_MODULE_PATH", "/srv/idp/main.py"))
+    _idp = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_idp)
+    app.mount("/idp", _idp.app)
+
 from app.labgate import gate_middleware
 app.middleware("http")(gate_middleware)
 

@@ -1,5 +1,5 @@
 import base64, datetime as dt, hashlib, html, json, os, secrets, sys, time
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "backend", "app"))
 
@@ -9,10 +9,14 @@ from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from lxml import etree
 
-from idp_lib import IDP_ENTITY_ID, NS, b64, build_response, inflate_request, load_or_create
+try:
+    from idp_lib import IDP_ENTITY_ID, NS, b64, build_response, inflate_request, load_or_create
+except ImportError:
+    from app.idp_lib import IDP_ENTITY_ID, NS, b64, build_response, inflate_request, load_or_create
 
 BASE = os.environ.get("IDP_BASE_URL", "http://localhost:9000").rstrip("/")
 CERT_DIR = os.environ.get("IDP_CERT_DIR", "./idp-certs")
+PREFIX = urlparse(BASE).path.rstrip("/")
 LAB_TOOLS = os.environ.get("IDP_LAB_TOOLS", "1") == "1"
 OIDC_CLIENTS = {os.environ.get("OIDC_CLIENT_ID", "vc_northwind_oidc"): os.environ.get("OIDC_CLIENT_SECRET", "oidc-demo-secret-northwind")}
 PASSWORD = os.environ.get("IDP_USER_PASSWORD", "Idp#Pass2026")
@@ -95,7 +99,7 @@ def saml_sso(SAMLRequest: str = "", RelayState: str = ""):
     info = parse_authn(SAMLRequest)
     if not info["acs"] or not info["id"]:
         raise HTTPException(400, "Incomplete authentication request")
-    return login_page("/saml/sso", {"SAMLRequest": SAMLRequest, "RelayState": RelayState})
+    return login_page(f"{PREFIX}/saml/sso", {"SAMLRequest": SAMLRequest, "RelayState": RelayState})
 
 
 @app.post("/saml/sso")
@@ -103,7 +107,7 @@ def saml_sso_post(SAMLRequest: str = Form(...), RelayState: str = Form(""), emai
     info = parse_authn(SAMLRequest)
     user = check(email, password)
     if not user:
-        return login_page("/saml/sso", {"SAMLRequest": SAMLRequest, "RelayState": RelayState}, "Incorrect account or password", 401)
+        return login_page(f"{PREFIX}/saml/sso", {"SAMLRequest": SAMLRequest, "RelayState": RelayState}, "Incorrect account or password", 401)
     xml = build_response(KEY_PEM, CERT_PEM, destination=info["acs"], audience=info["issuer"] or info["acs"], in_response_to=info["id"], name_id=email,
                          attributes={"email": email, "name": user["name"], "role": user["role"]})
     form = (f'<!doctype html><body onload="document.forms[0].submit()"><form method=post action="{html.escape(info["acs"])}"><input type=hidden name=SAMLResponse value="{b64(xml)}">'
@@ -132,7 +136,7 @@ def oidc_jwks():
 def oidc_authorize(client_id: str, redirect_uri: str, state: str = "", nonce: str = "", response_type: str = "code", scope: str = "openid"):
     if client_id not in OIDC_CLIENTS or response_type != "code":
         raise HTTPException(400, "Unknown client or unsupported response type")
-    return login_page("/oidc/authorize", {"client_id": client_id, "redirect_uri": redirect_uri, "state": state, "nonce": nonce, "scope": scope})
+    return login_page(f"{PREFIX}/oidc/authorize", {"client_id": client_id, "redirect_uri": redirect_uri, "state": state, "nonce": nonce, "scope": scope})
 
 
 @app.post("/oidc/authorize")
@@ -141,7 +145,7 @@ def oidc_authorize_post(client_id: str = Form(...), redirect_uri: str = Form(...
     if client_id not in OIDC_CLIENTS:
         raise HTTPException(400, "Unknown client")
     if not check(email, password):
-        return login_page("/oidc/authorize", hidden, "Incorrect account or password", 401)
+        return login_page(f"{PREFIX}/oidc/authorize", hidden, "Incorrect account or password", 401)
     code = secrets.token_urlsafe(24)
     CODES[code] = {"email": email, "client_id": client_id, "redirect_uri": redirect_uri, "nonce": nonce, "exp": time.time() + 120}
     sep = "&" if "?" in redirect_uri else "?"

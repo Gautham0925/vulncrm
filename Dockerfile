@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libxml2 libxmls
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
+COPY idp/main.py /srv/idp/main.py
 COPY scripts/entrypoint.sh /entrypoint.sh
 COPY --from=web /app/dist /srv/static
 RUN chmod +x /entrypoint.sh && mkdir -p /data/uploads /data/keys /data/idp && chown -R app:app /data /srv

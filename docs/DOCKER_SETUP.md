@@ -49,6 +49,7 @@ Notes:
 
 - With `LAB_GATE_PASSWORD` set, every request except `/api/health` needs the gate cookie (or an `X-Lab-Key` header carrying the password, for proxies and scripts). Leave it unset for local use.
 - The database is SQLite on the container's ephemeral disk; it reseeds on every restart or redeploy, which also resets lab data.
-- The synthetic IdP and Node connector are not part of the single container, so SSO (SAML/OIDC login) and Node/NoSQL scenarios need the full `docker compose` stack.
+- The synthetic IdP is embedded under `/idp` (`EMBED_IDP=1`), so SAML and OIDC sign-in work on the same link. Its lab tools are at `/idp/lab/saml/issue` and `/idp/lab/oidc/issue`. The Node connector is not included, so Node/NoSQL scenarios need the full `docker compose` stack.
+- Requests from inside the container (the OIDC token exchange) bypass the password gate; requests arriving through the platform proxy do not.
 - The free tier sleeps when idle; the first request after a pause takes about a minute.
 - All learners share one dataset and one process (and its rate limits).

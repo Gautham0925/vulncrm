@@ -33,6 +33,8 @@ async def gate_middleware(request: Request, call_next):
     if not enabled():
         return await call_next(request)
     path = request.url.path
+    if request.client and request.client.host in ("127.0.0.1", "::1") and "x-forwarded-for" not in request.headers:
+        return await call_next(request)
     if path == "/__gate":
         if request.method == "POST":
             form = (await request.body()).decode()
