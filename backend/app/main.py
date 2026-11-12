@@ -123,6 +123,10 @@ def startup_status(request: Request):
     return {"database": "error" if err else "ok", "detail": err if mode() == "vulnerable" else None}
 
 
+from app.labgate import gate_middleware
+app.middleware("http")(gate_middleware)
+
+
 static_root = os.path.abspath(settings.static_dir)
 if os.path.isdir(static_root):
     if os.path.isdir(os.path.join(static_root, "assets")):

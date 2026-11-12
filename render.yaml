@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: vulncrm-lab
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: SECURITY_MODE
+        value: vulnerable
+      - key: ENVIRONMENT
+        value: training
+      - key: TRAINING_ACK
+        value: "true"
+      - key: DATABASE_URL
+        value: sqlite:////data/app.db
+      - key: LAB_GATE_PASSWORD
+        sync: false
+      - key: VULNCRM_DISABLE_WEBHOOKS
+        value: "1"

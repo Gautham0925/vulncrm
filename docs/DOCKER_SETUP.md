@@ -36,3 +36,19 @@ Named volumes: `pgdata`, `uploads`, `keys`, `idpcerts`. Reset everything with `d
 
 - Rate limiting is in-process, so no Redis service is provided.
 - The Mongo service is not required: the connector uses an in-memory Mongo-style matcher. The profile exists for exercises that replace it.
+
+## Single-link hosting (Render free tier)
+
+`render.yaml` deploys one container (API plus built frontend) in the vulnerable training configuration behind a shared lab password.
+
+1. In Render choose **New → Blueprint**, connect `Gautham0925/vulncrm`, and apply `render.yaml`.
+2. When prompted, set `LAB_GATE_PASSWORD` to the password you will share with learners.
+3. Share the `https://…onrender.com` link. Visitors enter the lab password once, then sign in with the seeded accounts.
+
+Notes:
+
+- With `LAB_GATE_PASSWORD` set, every request except `/api/health` needs the gate cookie (or an `X-Lab-Key` header carrying the password, for proxies and scripts). Leave it unset for local use.
+- The database is SQLite on the container's ephemeral disk; it reseeds on every restart or redeploy, which also resets lab data.
+- The synthetic IdP and Node connector are not part of the single container, so SSO (SAML/OIDC login) and Node/NoSQL scenarios need the full `docker compose` stack.
+- The free tier sleeps when idle; the first request after a pause takes about a minute.
+- All learners share one dataset and one process (and its rate limits).
