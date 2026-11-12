@@ -57,7 +57,7 @@ def make_pdf(path: str, title: str, lines: list[str]):
 def person(db, org, role, email, name, team=None, title=None, dept=None, mfa=False, manager=None, salary=None, color="#4F46E5"):
     u = db.query(User).filter(User.email == email).first()
     if not u:
-        u = User(email=email, name=name, password_hash=hash_password(settings.seed_password), mfa_enabled=mfa, avatar_color=color)
+        u = User(email=email, name=name, password_hash=hash_password(settings.superadmin_password if email == "superadmin@vulncrm.test" and settings.superadmin_password else settings.seed_password), mfa_enabled=mfa, avatar_color=color)
         db.add(u)
         db.flush()
     m = Membership(user_id=u.id, org_id=org.id, role_id=role.id, team_id=team.id if team else None, title=title, department=dept, salary=salary, manager_id=manager.id if manager else None,

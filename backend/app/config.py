@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     node_service_url: str = "http://localhost:3100"
     seed_on_start: bool = True
     seed_password: str = "Crm#Pass2026"
+    superadmin_password: str = ""
     rate_limit_multiplier: int = 1
 
     @property

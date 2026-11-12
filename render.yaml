@@ -17,6 +17,8 @@ services:
         value: sqlite:////data/app.db
       - key: EMBED_IDP
         value: "1"
+      - key: SUPERADMIN_PASSWORD
+        sync: false
       - key: LAB_GATE_PASSWORD
         sync: false
       - key: VULNCRM_DISABLE_WEBHOOKS

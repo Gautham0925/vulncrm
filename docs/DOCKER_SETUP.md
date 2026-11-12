@@ -53,3 +53,5 @@ Notes:
 - Requests from inside the container (the OIDC token exchange) bypass the password gate; requests arriving through the platform proxy do not.
 - The free tier sleeps when idle; the first request after a pause takes about a minute.
 - All learners share one dataset and one process (and its rate limits).
+
+- Set `SUPERADMIN_PASSWORD` (any environment) to give `superadmin@vulncrm.test` its own password instead of the shared seed password. It is applied when the account is first seeded, so on Render it takes effect on the next deploy.
