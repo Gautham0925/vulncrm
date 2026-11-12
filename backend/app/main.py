@@ -70,11 +70,12 @@ async def platform_middleware(request: Request, call_next):
             resp.headers["Vary"] = "Origin"
     if not vuln("misconfig_headers"):
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
-        resp.headers.setdefault("X-Frame-Options", "DENY")
+        preview = request.url.path.startswith("/api/documents/") and request.url.path.endswith("/preview")
+        resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN" if preview else "DENY")
         resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
         if request.url.path.startswith("/api") and "content-security-policy" not in resp.headers:
-            resp.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+            resp.headers["Content-Security-Policy"] = "frame-ancestors 'self'" if preview else "default-src 'none'; frame-ancestors 'none'"
         if settings.public_base_url.startswith("https"):
             resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
     else:

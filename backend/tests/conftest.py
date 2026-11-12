@@ -4,6 +4,7 @@ os.environ["DATABASE_URL"] = f"sqlite:///{_d}/t.db"
 os.environ["UPLOAD_DIR"] = f"{_d}/up"
 os.environ["KEYS_DIR"] = f"{_d}/keys"
 os.environ["VULNCRM_DISABLE_WEBHOOKS"] = "1"
+os.environ["RATE_LIMIT_MULTIPLIER"] = "50"
 os.environ["IDP_CERT_DIR"] = f"{_d}/idp"
 from fastapi.testclient import TestClient
 from app import mode

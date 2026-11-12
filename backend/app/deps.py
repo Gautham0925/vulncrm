@@ -66,7 +66,7 @@ def rate_limit(request: Request, bucket: str, limit: int, window: int, key: str 
     t = time.time()
     while q and q[0] < t - window:
         q.popleft()
-    if len(q) >= limit:
+    if len(q) >= limit * max(1, get_settings().rate_limit_multiplier):
         raise HTTPException(429, "Too many requests. Try again later.", headers={"Retry-After": str(window)})
     q.append(t)
 

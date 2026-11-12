@@ -1,0 +1,25 @@
+{
+  "cookies": [
+    {
+      "name": "vc_session",
+      "value": "xISs0269RF-damxGEZRWIHUz9a5l8ske",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1794505812.597797,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "vc_csrf",
+      "value": "8XUKmy3g_KU0fHlfkVWsbudzYXZBmaIE",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Strict"
+    }
+  ],
+  "origins": []
+}

@@ -1,0 +1,12 @@
+{
+  "name": "vulncrm-e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:vulnerable": "MODE=vulnerable BASE_URL=http://localhost:8000 playwright test",
+    "test:secure": "MODE=secure BASE_URL=http://localhost:8001 playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
+  }
+}
