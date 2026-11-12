@@ -22,7 +22,7 @@ def notify(db, org_id, membership_id, title, body=None, link=None):
     db.add(Notification(org_id=org_id, membership_id=membership_id, title=title, body=body, link=link))
 
 
-def egress_check(url: str) -> tuple[bool, str]:
+def egress_check(url: str, allow_private: bool = False) -> tuple[bool, str]:
     u = urlparse(url)
     if u.scheme not in ("http", "https"):
         return False, "Only http and https URLs are supported"
@@ -37,13 +37,13 @@ def egress_check(url: str) -> tuple[bool, str]:
         ip = ipaddress.ip_address(info[4][0])
         if ip.is_link_local or str(ip).startswith("169.254.") or ip.is_multicast or ip.is_unspecified:
             return False, "Destination is not allowed"
-        if not vuln("ssrf") and (ip.is_private or ip.is_loopback or ip.is_reserved):
+        if not allow_private and not vuln("ssrf") and (ip.is_private or ip.is_loopback or ip.is_reserved):
             return False, "Destination is not allowed"
     return True, ""
 
 
-def safe_fetch(url: str, method: str = "GET", json=None, headers=None, timeout: float = 3.0, max_bytes: int = 20000):
-    ok, why = egress_check(url)
+def safe_fetch(url: str, method: str = "GET", json=None, headers=None, timeout: float = 3.0, max_bytes: int = 20000, allow_private: bool = False):
+    ok, why = egress_check(url, allow_private)
     if not ok:
         return {"ok": False, "error": why}
     try:

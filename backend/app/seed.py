@@ -216,8 +216,9 @@ def run():
             db.add(SamlConfig(org_id=nw.id, enabled=True, idp_entity_id=IDP_ENTITY_ID, sso_url=f"{settings.idp_base_url.rstrip('/')}/saml/sso", slo_url=f"{settings.idp_base_url.rstrip('/')}/saml/slo", x509_cert=cert.decode(),
                               sp_entity_id=f"{base}/saml/northwind/metadata", acs_url=f"{base}/saml/northwind/acs", jit_provisioning=True, default_role_key="sales_rep"))
             idp = settings.idp_base_url.rstrip("/")
+            idp_internal = (settings.idp_internal_url or settings.idp_base_url).rstrip("/")
             db.add(IntegrationConfig(org_id=nw.id, kind="oidc", name="Corporate OpenID Connect", config={"issuer": f"{idp}/oidc", "client_id": OIDC_CLIENT_ID, "client_secret": OIDC_CLIENT_SECRET, "authorize_url": f"{idp}/oidc/authorize",
-                                                                                                          "token_url": f"{idp}/oidc/token", "jwks_url": f"{idp}/oidc/jwks.json", "redirect_uri": f"{base}/api/auth/oidc/northwind/callback"}))
+                                                                                                          "token_url": f"{idp_internal}/oidc/token", "jwks_url": f"{idp_internal}/oidc/jwks.json", "redirect_uri": f"{base}/api/auth/oidc/northwind/callback"}))
             db.add(IntegrationConfig(org_id=nw.id, kind="slack", name="Sales alerts", config={"channel": "#sales-alerts"}, enabled=False))
             nw.settings = {"mfa_required": False, "allowed_email_domains": ["northwind.test", "vulncrm.test", "idp.test"]}
             from app.testcases_seed import seed_testcases

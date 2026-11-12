@@ -1,0 +1,84 @@
+name: vulncrm
+
+x-backend-env: &backend-env
+  SECURITY_MODE: ${SECURITY_MODE:-vulnerable}
+  ENVIRONMENT: ${ENVIRONMENT:-training}
+  TRAINING_ACK: ${TRAINING_ACK:-true}
+  VULN_DISABLE: ${VULN_DISABLE:-}
+  DATABASE_URL: postgresql://vulncrm:${POSTGRES_PASSWORD:-vulncrm_dev_only}@postgres:5432/vulncrm
+  PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+  IDP_BASE_URL: ${IDP_PUBLIC_URL:-http://localhost:9000}
+  IDP_INTERNAL_URL: http://idp:9000
+  NODE_SERVICE_URL: http://connector:3100
+  UPLOAD_DIR: /data/uploads
+  KEYS_DIR: /data/keys
+  IDP_CERT_DIR: /data/idp
+  STATIC_DIR: /nonexistent
+  RATE_LIMIT_MULTIPLIER: ${RATE_LIMIT_MULTIPLIER:-1}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: vulncrm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vulncrm_dev_only}
+      POSTGRES_DB: vulncrm
+    volumes: [pgdata:/var/lib/postgresql/data]
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vulncrm"]
+      interval: 5s
+      retries: 10
+
+  backend:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    environment: *backend-env
+    depends_on:
+      postgres: { condition: service_healthy }
+    volumes: [uploads:/data/uploads, keys:/data/keys, idpcerts:/data/idp]
+    networks: [app, data, lab]
+
+  frontend:
+    build: { context: ., dockerfile: frontend/Dockerfile }
+    networks: [app]
+
+  nginx:
+    image: nginx:1.27-alpine
+    volumes: [./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro]
+    depends_on: [backend, frontend]
+    ports: ["127.0.0.1:8080:8080"]
+    networks: [app, edge]
+
+  idp:
+    build: { context: ., dockerfile: idp/Dockerfile }
+    environment:
+      IDP_BASE_URL: ${IDP_PUBLIC_URL:-http://localhost:9000}
+      IDP_CERT_DIR: /data/idp
+      IDP_LAB_TOOLS: ${IDP_LAB_TOOLS:-1}
+    volumes: [idpcerts:/data/idp]
+    ports: ["127.0.0.1:9000:9000"]
+    networks: [lab, edge]
+
+  connector:
+    build: { context: ., dockerfile: node-service/Dockerfile }
+    environment:
+      CONNECTOR_TRAINING: ${CONNECTOR_TRAINING:-1}
+    networks: [lab]
+
+  mongo:
+    image: mongo:7
+    profiles: ["mongo"]
+    networks: [lab]
+
+networks:
+  edge: {}
+  app: { internal: true }
+  data: { internal: true }
+  lab: { internal: true }
+
+volumes:
+  pgdata: {}
+  uploads: {}
+  keys: {}
+  idpcerts: {}

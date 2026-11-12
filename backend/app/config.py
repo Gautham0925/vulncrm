@@ -11,7 +11,6 @@ class Settings(BaseSettings):
     vuln_disable: str = ""
 
     database_url: str = "sqlite:///./vulncrm.db"
-    redis_url: str = ""
     keys_dir: str = "./keys"
     upload_dir: str = "./uploads"
     static_dir: str = "./static"
@@ -29,6 +28,7 @@ class Settings(BaseSettings):
     bcrypt_rounds: int = 10
 
     idp_base_url: str = "http://localhost:9000"
+    idp_internal_url: str = ""
     node_service_url: str = "http://localhost:3100"
     seed_on_start: bool = True
     seed_password: str = "Crm#Pass2026"

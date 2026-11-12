@@ -4,7 +4,7 @@ _override: str | None = None
 _disabled_extra: set[str] = set()
 
 ALL_FLAGS = [
-    "bola", "bfla", "bopla", "mass_assignment", "data_exposure", "api_key_weak", "rate_limit", "method_override",
+    "bola", "bfla", "mass_assignment", "data_exposure", "api_key_weak", "rate_limit", "method_override",
     "legacy_api", "verbose_errors", "gql_introspection", "gql_depth", "gql_batching", "gql_field_authz", "gql_mutation_authz",
     "oauth_redirect", "oauth_state", "oauth_pkce", "oauth_code_reuse", "oauth_scope", "oauth_refresh", "oauth_client_auth", "oauth_expiry",
     "oidc_validation", "oidc_nonce", "oidc_linking", "oidc_jku",

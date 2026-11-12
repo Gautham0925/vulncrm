@@ -2,23 +2,23 @@
   "cookies": [
     {
       "name": "vc_session",
-      "value": "BOiyeMEtHmLYni6IdP7C7yix99ykoarg",
+      "value": "mpv73E2p8ELHvS3xQhMNAIsrlYFDcZM2",
       "domain": "localhost",
       "path": "/",
-      "expires": 1794505811.590681,
-      "httpOnly": true,
+      "expires": 1797055034.244692,
+      "httpOnly": false,
       "secure": false,
-      "sameSite": "Strict"
+      "sameSite": "Lax"
     },
     {
       "name": "vc_csrf",
-      "value": "7O4heNJhqsuwfww6pZVSWG0c0GjnlTbt",
+      "value": "f7emc16LjeQmnm61VCTBpvjbS1EXxiEp",
       "domain": "localhost",
       "path": "/",
       "expires": -1,
       "httpOnly": false,
       "secure": false,
-      "sameSite": "Strict"
+      "sameSite": "Lax"
     }
   ],
   "origins": []

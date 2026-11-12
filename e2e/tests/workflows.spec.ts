@@ -159,7 +159,7 @@ test("11. SSO: SAML sign-in through the synthetic identity provider", async ({ b
 test("12. security library: filter and open a test case", async ({ browser }) => {
   const { ctx, page } = await as(browser, "auditor");
   await page.goto("/test-library");
-  await expect(page.getByText("70 documented test cases")).toBeVisible();
+  await expect(page.getByText("71 documented test cases")).toBeVisible();
   await page.getByLabel("Category").selectOption("SAML 2.0");
   await page.getByRole("cell", { name: /Missing signature handling/ }).click();
   await expect(page.getByRole("dialog").getByText("Manual test procedure")).toBeVisible();
@@ -172,5 +172,20 @@ test("13. configuration banner matches the active mode", async ({ browser }) => 
   await page.goto("/");
   if (vulnerableOnly) await expect(page.getByRole("note")).toContainText(/intentionally vulnerable/i);
   else await expect(page.getByRole("note")).toHaveCount(0);
+  await ctx.close();
+});
+
+test("14. SSO: OpenID Connect sign-in through the synthetic identity provider", async ({ browser }) => {
+  const base = process.env.BASE_URL || "http://localhost:8000";
+  const ctx = await browser.newContext({ baseURL: base });
+  const page = await ctx.newPage();
+  await page.goto("/login");
+  await page.getByRole("link", { name: "OpenID Connect" }).click();
+  await page.waitForURL(/localhost:9000\/oidc\/authorize/);
+  await page.locator("select[name=email]").selectOption("rep1@northwind.test");
+  await page.locator("input[name=password]").fill("Idp#Pass2026");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await page.waitForURL((u) => u.port === new URL(base).port && u.pathname === "/");
+  await expect(page.getByText("Welcome back")).toBeVisible();
   await ctx.close();
 });

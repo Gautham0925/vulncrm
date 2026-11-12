@@ -42,8 +42,8 @@ def login(slug: str, request: Request, db: Session = Depends(get_db)):
     return RedirectResponse(f"{cfg['authorize_url']}?{urlencode(q)}", status_code=302)
 
 
-def fetch_jwks(url: str) -> dict:
-    res = safe_fetch(url, "GET", timeout=3, max_bytes=100000)
+def fetch_jwks(url: str, trusted: bool = False) -> dict:
+    res = safe_fetch(url, "GET", timeout=3, max_bytes=100000, allow_private=trusted)
     if not res.get("ok"):
         raise SamlError("Unable to retrieve signing keys")
     return json.loads(res["body"])
@@ -57,9 +57,10 @@ def validate_id_token(token: str, cfg: dict, expected_nonce: str | None) -> dict
     if header.get("alg") != "RS256":
         raise SamlError("Unsupported signing algorithm")
     url = cfg["jwks_url"]
+    trusted = True
     if vuln("oidc_jku") and header.get("jku"):
-        url = header["jku"]
-    jwks = fetch_jwks(url)
+        url, trusted = header["jku"], False
+    jwks = fetch_jwks(url, trusted)
     key = next((k for k in jwks.get("keys", []) if k.get("kid") == header.get("kid")), None)
     if key is None and vuln("oidc_validation") and jwks.get("keys"):
         key = jwks["keys"][0]
